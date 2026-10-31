@@ -1,0 +1,848 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>CyberSeva</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+Devanagari:wght@400;600&family=Noto+Sans+Kannada:wght@400;600&display=swap">
+<style>
+/* Layout: sticky left rail grouped by the protection lifecycle (before, after, beyond); the main column shows one module at a time and a shared demo incident (a fake bank officer call) carries across modules. */
+:root{
+  --bg:#F1F4F2; --surface:#FFFFFF; --surface-2:#F5F8F6; --ink:#12201C; --muted:#54635E; --line:#D4DCD7;
+  --accent:#0A5C54; --accent-ink:#FFFFFF; --accent-soft:#DAEDE8;
+  --crit:#B3261E; --crit-soft:#FBE6E3; --high:#A84A06; --high-soft:#FCEADB; --med:#85600A; --med-soft:#F6ECC8; --ok:#1B7343; --ok-soft:#DDF0E4;
+  --f-display:'Bricolage Grotesque','IBM Plex Sans',system-ui,sans-serif;
+  --f-body:'IBM Plex Sans','Noto Sans Devanagari','Noto Sans Kannada',system-ui,sans-serif;
+  --f-mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0C1311; --surface:#131C19; --surface-2:#18231F; --ink:#E5EEEA; --muted:#98A9A2; --line:#26342F;
+  --accent:#4FC4B2; --accent-ink:#06201C; --accent-soft:#143029;
+  --crit:#FF8F86; --crit-soft:#3A1816; --high:#FFA566; --high-soft:#3A2412; --med:#E9C459; --med-soft:#33290D; --ok:#6FD39A; --ok-soft:#12301F;
+  color-scheme:dark; } }
+:root[data-theme="dark"]{
+  --bg:#0C1311; --surface:#131C19; --surface-2:#18231F; --ink:#E5EEEA; --muted:#98A9A2; --line:#26342F;
+  --accent:#4FC4B2; --accent-ink:#06201C; --accent-soft:#143029;
+  --crit:#FF8F86; --crit-soft:#3A1816; --high:#FFA566; --high-soft:#3A2412; --med:#E9C459; --med-soft:#33290D; --ok:#6FD39A; --ok-soft:#12301F;
+  color-scheme:dark; }
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0}
+h1,h2,h3{font-family:var(--f-display);margin:0;text-wrap:balance;line-height:1.15}
+h2{font-size:18px;font-weight:700}
+h3{font-size:15px;font-weight:700}
+p{margin:0}
+a{color:var(--accent)}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.mono{font-family:var(--f-mono)}
+
+.app{display:grid;grid-template-columns:232px minmax(0,1fr);gap:32px;max-width:1180px;margin:0 auto;min-height:100%}
+.rail{position:sticky;top:env(safe-area-inset-top,0px);align-self:start;max-height:100vh;overflow:auto;padding:24px 0;display:flex;flex-direction:column;gap:20px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink)}
+.brand svg{flex:none}
+.brand b{font-family:var(--f-display);font-size:20px;display:block;line-height:1}
+.brand small{display:block;font-size:11.5px;color:var(--muted);margin-top:3px}
+#nav{display:flex;flex-direction:column;gap:2px}
+#nav .grp{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin:14px 0 4px 10px}
+#nav a{padding:8px 10px;border-radius:8px;text-decoration:none;color:var(--ink);font-size:14px;border:1px solid transparent}
+#nav a:hover{background:var(--surface)}
+#nav a[aria-current="page"]{background:var(--accent-soft);color:var(--accent);font-weight:600;border-color:transparent}
+.sos{border:1px solid var(--crit);background:var(--crit-soft);border-radius:10px;padding:10px 12px;font-size:13px}
+.sos b{font-family:var(--f-mono);font-size:22px;display:block;color:var(--crit);line-height:1.1}
+
+main{padding:28px 0 64px;min-width:0}
+.mod{display:flex;flex-direction:column;gap:20px}
+.eyebrow{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--accent);margin-bottom:8px}
+.mod h1{font-size:clamp(26px,4.2vw,38px);font-weight:700;letter-spacing:-.01em}
+.lede{color:var(--muted);max-width:64ch;margin-top:10px}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;min-width:0}
+.card.flat{background:var(--surface-2)}
+.stack{display:flex;flex-direction:column;gap:14px;min-width:0}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.label{display:block;font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+
+.btn{border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);padding:9px 16px;border-radius:8px;cursor:pointer;font-weight:600;font-size:14px}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn.ghost:hover{background:var(--accent-soft)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.btn.big{padding:16px 20px;font-size:17px}
+.chip-btn{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;font-size:13px;cursor:pointer}
+.chip-btn:hover{border-color:var(--accent)}
+.chip-btn[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+textarea,input[type=text],input[type=number],input[type=time],select{width:100%;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+textarea{min-height:128px;resize:vertical}
+
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;padding:3px 10px;border-radius:999px;background:var(--surface-2);border:1px solid var(--line)}
+.chip.act{background:var(--high-soft);border-color:transparent;color:var(--high);font-weight:600}
+.chip.tac{background:var(--med-soft);border-color:transparent;color:var(--med)}
+.pill{display:inline-flex;align-items:center;gap:6px;font-family:var(--f-mono);font-size:12px;font-weight:500;letter-spacing:.04em;text-transform:uppercase;padding:3px 10px;border-radius:6px;background:var(--lv-soft);color:var(--lv)}
+.pill::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--lv)}
+.lv-critical{--lv:var(--crit);--lv-soft:var(--crit-soft)}
+.lv-high{--lv:var(--high);--lv-soft:var(--high-soft)}
+.lv-medium{--lv:var(--med);--lv-soft:var(--med-soft)}
+.lv-low{--lv:var(--ok);--lv-soft:var(--ok-soft)}
+
+.meter{height:10px;border-radius:6px;background:var(--surface-2);border:1px solid var(--line);overflow:hidden}
+.meter span{display:block;height:100%;background:var(--lv);transition:width .35s ease}
+.callout{border-left:3px solid var(--lv,var(--accent));background:var(--lv-soft,var(--accent-soft));padding:12px 14px;border-radius:0 8px 8px 0}
+.callout b{display:block;margin-bottom:2px}
+.dashed{border:1px dashed var(--muted);border-radius:8px;padding:12px 14px;background:transparent}
+.hl{background:var(--med-soft);color:var(--ink);border-radius:3px;padding:0 2px;box-shadow:inset 0 -2px 0 var(--med)}
+.quote{font-size:16px;line-height:1.55;background:var(--surface-2);border-radius:8px;padding:12px 14px;overflow-wrap:anywhere}
+ul.plain{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+ul.plain li{padding-left:18px;position:relative}
+ul.plain li::before{content:"";position:absolute;left:0;top:.62em;width:7px;height:7px;border-radius:2px;background:var(--lv,var(--accent))}
+
+/* demo bar */
+#demobar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--ink);color:var(--bg);border-radius:10px;padding:10px 14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+#demobar .steps{display:flex;gap:6px;flex-wrap:wrap;flex:1;min-width:0}
+#demobar .st{font-size:12px;padding:3px 9px;border-radius:999px;border:1px solid color-mix(in srgb,var(--bg) 35%,transparent);opacity:.7}
+#demobar .st.on{background:var(--bg);color:var(--ink);opacity:1;font-weight:600}
+#demobar .st.done{opacity:1}
+#demobar button{border:1px solid var(--bg);background:transparent;color:var(--bg);border-radius:7px;padding:5px 12px;font-size:13px;cursor:pointer}
+#demobar button.go{background:var(--bg);color:var(--ink);font-weight:600}
+#demobar button[disabled]{opacity:.4;cursor:not-allowed}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+
+/* overview */
+.hero{display:flex;flex-direction:column;gap:14px;padding:6px 0}
+.tag{font-family:var(--f-mono);font-size:12.5px;color:var(--muted);display:flex;gap:6px 12px;flex-wrap:wrap}
+.tag span{white-space:nowrap}
+.tag span+span::before{content:"/";margin-right:12px;color:var(--line)}
+.life a.item{display:block;text-decoration:none;color:inherit;padding:10px 0;border-top:1px solid var(--line)}
+.life a.item:first-of-type{border-top:0}
+.life a.item b{display:block;color:var(--accent)}
+.life a.item:hover b{text-decoration:underline}
+
+/* analyzer */
+.risk-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{background:var(--surface);border:0;padding:6px 12px;cursor:pointer;font-size:13px}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);font-weight:600}
+.lang-box{font-size:16px;line-height:1.6}
+
+/* journey */
+.chat{display:flex;flex-direction:column;gap:12px}
+.msg{max-width:92%;border-radius:12px;padding:10px 12px;border:1px solid var(--line);background:var(--surface-2)}
+.msg.you{align-self:flex-end;background:var(--accent-soft);border-color:transparent}
+.msg .who{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
+.msg .chips{margin-top:8px;display:flex;gap:6px;flex-wrap:wrap}
+.msg.new{animation:pop .3s ease}
+@keyframes pop{from{transform:translateY(6px);opacity:.2}to{transform:none;opacity:1}}
+.stage{display:flex;gap:10px;align-items:center;padding:8px 10px;border-radius:8px;border:1px solid transparent;color:var(--muted)}
+.stage i{flex:none;width:22px;height:22px;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center;font-style:normal;font-family:var(--f-mono);font-size:11px}
+.stage.seen{color:var(--ink)}
+.stage.seen i{background:var(--lv);border-color:var(--lv);color:var(--surface)}
+.stage.next{border:1px dashed var(--muted);color:var(--ink)}
+.stage.next i{border-style:dashed;border-color:var(--muted)}
+.stage .t{font-size:11.5px;margin-left:auto;font-family:var(--f-mono);text-transform:uppercase;letter-spacing:.05em}
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.compare div{background:var(--surface-2);border-radius:8px;padding:10px 12px}
+.compare b{font-family:var(--f-display);font-size:22px;display:block}
+
+/* verify */
+.checks{display:flex;flex-direction:column;gap:6px}
+.checks label{display:flex;gap:8px;align-items:center;cursor:pointer}
+.dir{width:100%;border-collapse:collapse;font-size:13px}
+.dir th,.dir td{text-align:left;padding:6px 8px;border-top:1px solid var(--line);vertical-align:top}
+.dir th{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.scroll-x{overflow-x:auto}
+
+/* timeline */
+.tl{display:flex;flex-direction:column;gap:0;position:relative;padding-left:26px}
+.tl::before{content:"";position:absolute;left:8px;top:8px;bottom:8px;width:2px;background:var(--line)}
+.ev{position:relative;padding-bottom:18px}
+.ev::before{content:"";position:absolute;left:-24px;top:16px;width:14px;height:14px;border-radius:50%;background:var(--lv);border:3px solid var(--bg)}
+.ev .head{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
+.ev .stg{font-weight:600}
+.ev .reported{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:10px 12px}
+.ev .reported .meta{font-family:var(--f-mono);font-size:12px;color:var(--muted);margin-bottom:4px;overflow-wrap:anywhere}
+.ev .inferred{margin-top:6px}
+.ev .inferred .label{margin-bottom:4px}
+.key{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;align-items:center}
+.key .sw{display:inline-block;width:26px;height:14px;vertical-align:-2px;margin-right:6px;border-radius:3px}
+.key .rep{border:1px solid var(--line);background:var(--surface)}
+.key .inf{border:1px dashed var(--muted)}
+
+/* recovery */
+.tasks{display:flex;flex-direction:column;gap:10px}
+.task{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.task input{width:20px;height:20px;margin-top:2px;accent-color:var(--accent)}
+.task.done{background:var(--surface-2)}
+.task.done .tt{text-decoration:line-through;color:var(--muted)}
+.task .tt{font-weight:600}
+.when{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;border-radius:5px;background:var(--lv-soft);color:var(--lv);margin-left:8px;white-space:nowrap}
+pre.draft{white-space:pre-wrap;overflow-wrap:anywhere;font-family:var(--f-mono);font-size:12.5px;line-height:1.55;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:12px;margin:0}
+
+/* family */
+.phone{max-width:340px;background:var(--surface-2);border:1px solid var(--line);border-radius:18px;padding:14px}
+.bubble{background:var(--accent-soft);color:var(--ink);border-radius:14px 14px 4px 14px;padding:10px 12px;font-size:14px}
+.toggle{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+.toggle:first-of-type{border-top:0}
+.toggle input{width:20px;height:20px;accent-color:var(--accent)}
+.senior{font-size:20px}
+.senior .btn{width:100%;text-align:left}
+
+/* simulator */
+.opt{display:block;width:100%;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:12px 14px;cursor:pointer;font-size:15px}
+.opt:hover:not([disabled]){border-color:var(--accent)}
+.opt[disabled]{cursor:default}
+.opt.picked{border-width:2px}
+.dots{display:flex;gap:6px}
+.dots i{width:28px;height:6px;border-radius:3px;background:var(--line)}
+.dots i.on{background:var(--accent)}
+
+.foot{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:14px;margin-top:8px}
+
+@media (max-width:900px){
+  .app{grid-template-columns:minmax(0,1fr);gap:0}
+  .rail{position:static;max-height:none;padding:16px 0 4px;gap:12px}
+  #nav{flex-direction:row;overflow-x:auto;gap:4px;padding-bottom:6px;scrollbar-width:thin}
+  #nav .grp{display:none}
+  #nav a{white-space:nowrap;border:1px solid var(--line);background:var(--surface)}
+  .sos{display:none}
+  main{padding-top:12px}
+  .grid2,.grid3{grid-template-columns:minmax(0,1fr)}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="app">
+  <aside class="rail">
+    <a class="brand" href="#overview" aria-label="CyberSeva home">
+      <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><path d="M17 3 5 8v8c0 7.4 5 12.6 12 15 7-2.4 12-7.6 12-15V8z" fill="var(--accent)"/><path d="m11 17 4.2 4.2L23.5 12.5" fill="none" stroke="var(--accent-ink)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span><b>CyberSeva</b><small>ScamSaathi AI prototype</small></span>
+    </a>
+    <nav id="nav" aria-label="Modules"></nav>
+    <div class="sos"><span>Lost money to fraud?</span><b>Call 1930</b><span>Then tell your bank.</span></div>
+  </aside>
+
+  <main>
+    <div id="demobar" hidden></div>
+
+    <!-- OVERVIEW -->
+    <section class="mod" id="m-overview">
+      <div class="hero">
+        <div class="eyebrow">Digital fraud prevention and recovery</div>
+        <h1>Stay with the person from the first suspicious message to the last recovery step.</h1>
+        <p class="lede">CyberSeva is a working prototype of ScamSaathi AI. It reads what a scammer is asking you to do, predicts the next move, helps you verify who is really calling, rebuilds the incident as evidence, and builds a recovery plan for you.</p>
+        <div class="tag"><span>Detect</span><span>Predict</span><span>Verify</span><span>Intervene</span><span>Investigate</span><span>Recover</span><span>Protect</span></div>
+        <div class="row"><button class="btn big" id="startDemo">Start the guided demo</button><span class="muted small">One incident, six steps, about five minutes.</span></div>
+      </div>
+      <div class="card flat stack">
+        <h2>The demo incident</h2>
+        <p>Priya in Bengaluru gets an SMS that her SBI KYC expires today. Minutes later a caller who says he is from the bank's security team tells her the account will be blocked. He asks for an OTP, has her install a remote app and enter her UPI PIN. ₹9,800 leaves her account. The next day, a "recovery cell" offers to return it for a fee.</p>
+        <p class="muted small">All names, numbers and accounts here are invented sample data.</p>
+      </div>
+      <div class="grid3 life" id="lifeGrid"></div>
+      <p class="foot">This prototype runs entirely in your browser. A rule-based engine stands in for the language model and OCR that the full product would use, so results on your own text are indicative, not a guarantee. ScamSaathi guides and prepares you. It cannot reverse a transaction or promise recovery of money.</p>
+    </section>
+
+    <!-- ANALYZER -->
+    <section class="mod" id="m-analyze" hidden>
+      <div><div class="eyebrow">Before and during fraud</div><h1>Scam and intent analyzer</h1>
+      <p class="lede">Paste a message, SMS or call transcript. It finds the action the sender wants you to take, the tactics used, and what to do instead. English, Hindi-English and Kannada-English are supported.</p></div>
+      <div class="grid2">
+        <div class="card stack">
+          <div><span class="label">Try a sample</span><div class="row" id="samples"></div></div>
+          <div><label class="label" for="anaText">Message or transcript</label><textarea id="anaText" spellcheck="false"></textarea></div>
+          <div class="row"><button class="btn" id="anaGo">Analyze</button><span class="muted small">Nothing leaves this page.</span></div>
+        </div>
+        <div class="stack" id="anaOut"></div>
+      </div>
+    </section>
+
+    <!-- JOURNEY -->
+    <section class="mod" id="m-journey" hidden>
+      <div><div class="eyebrow">Flagship · before and during fraud</div><h1>Scam journey predictor</h1>
+      <p class="lede">Scammers work in steps. Replay the call message by message and watch the engine place the conversation on the scam journey and estimate what comes next.</p></div>
+      <div class="grid2">
+        <div class="card stack">
+          <div class="risk-top"><h2>Call replay</h2><div class="row"><button class="btn" id="jNext">Next message</button><button class="btn ghost" id="jReset">Restart</button></div></div>
+          <div class="chat" id="jChat" aria-live="polite"></div>
+        </div>
+        <div class="stack" id="jOut"></div>
+      </div>
+    </section>
+
+    <!-- VERIFY -->
+    <section class="mod" id="m-verify" hidden>
+      <div><div class="eyebrow">Before and during fraud</div><h1>Trust verification assistant</h1>
+      <p class="lede">A name, a caller ID or a convincing voice proves nothing. Say who is contacting you and what they asked, and get the official way to check for yourself.</p></div>
+      <div class="grid2">
+        <div class="card stack">
+          <div><label class="label" for="vOrg">They say they are from</label><select id="vOrg"></select></div>
+          <div><label class="label" for="vCh">They reached you by</label><select id="vCh"><option value="call">Phone call</option><option value="sms">SMS</option><option value="wa">WhatsApp</option><option value="mail">Email</option></select></div>
+          <div><span class="label">They asked you to</span>
+            <div class="checks" id="vAsk"></div></div>
+          <div><label class="label" for="vDom">A link or website they gave you (optional)</label><input type="text" id="vDom" value="http://sbi-kyc-update.in/login" spellcheck="false"></div>
+        </div>
+        <div class="stack" id="vOut"></div>
+      </div>
+      <div class="card stack"><h2>Sample verified directory</h2>
+        <p class="muted small">Demo data. The full product keeps a maintained directory with the source and the date each entry was last checked.</p>
+        <div class="scroll-x"><table class="dir" id="dirTable"></table></div></div>
+    </section>
+
+    <!-- TIMELINE -->
+    <section class="mod" id="m-timeline" hidden>
+      <div><div class="eyebrow">After fraud</div><h1>Scam chain mapper and evidence timeline</h1>
+      <p class="lede">Messages, calls, screenshots and a payment, put in order. What you reported stays separate from what the engine infers, so you can check each link before you rely on it.</p></div>
+      <div class="card stack" id="tlSummary"></div>
+      <div class="key"><span><i class="sw rep"></i>Reported by you</span><span><i class="sw inf"></i>Inferred by the engine</span></div>
+      <div class="tl" id="tlList"></div>
+      <details class="card"><summary><b>Add another piece of evidence</b></summary>
+        <div class="stack" style="margin-top:14px">
+          <div class="grid3">
+            <div><label class="label" for="aType">Type</label><select id="aType"><option>SMS</option><option>WhatsApp</option><option>Call transcript</option><option>Payment screenshot</option><option>Email</option></select></div>
+            <div><label class="label" for="aDay">Day</label><select id="aDay"><option value="1">Day 1</option><option value="2">Day 2</option><option value="3">Day 3</option></select></div>
+            <div><label class="label" for="aTime">Time</label><input type="time" id="aTime" value="12:00"></div>
+          </div>
+          <div><label class="label" for="aFrom">From (number, UPI ID or name)</label><input type="text" id="aFrom" placeholder="e.g. 70XXX 55318"></div>
+          <div><label class="label" for="aText">What it said or showed</label><textarea id="aText" style="min-height:80px"></textarea></div>
+          <div><button class="btn" id="aAdd">Add to timeline</button></div>
+        </div></details>
+    </section>
+
+    <!-- RECOVERY -->
+    <section class="mod" id="m-recovery" hidden>
+      <div><div class="eyebrow">After fraud</div><h1>Recovery assistant</h1>
+      <p class="lede">Tell it what happened. It returns a checklist in the order that matters, tracks what you finish and drafts your complaint. Pre-filled with the demo incident.</p></div>
+      <div class="callout lv-critical" style="--lv:var(--crit);--lv-soft:var(--crit-soft)"><b>If money has left your account, call 1930 now and tell your bank.</b>1930 is the national cyber financial fraud helpline. Speed matters, and recovery is never guaranteed.</div>
+      <div class="grid2">
+        <div class="card stack">
+          <h2>What happened</h2>
+          <div class="checks" id="rIntake"></div>
+          <div class="grid2" style="gap:12px">
+            <div><label class="label" for="rAmt">Amount lost (₹)</label><input type="number" id="rAmt" value="9800" min="0"></div>
+            <div><label class="label" for="rRef">Transaction reference</label><input type="text" id="rRef" value="6102XXXXX482" spellcheck="false"></div>
+          </div>
+        </div>
+        <div class="stack">
+          <div class="card stack"><div class="risk-top"><h2>Your checklist</h2><span class="small muted" id="rCount"></span></div>
+            <div class="meter lv-low"><span id="rBar" style="width:0"></span></div>
+            <div class="tasks" id="rTasks"></div></div>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="card stack"><div class="risk-top"><h2>Complaint draft</h2><button class="btn ghost" id="rCopy">Copy draft</button></div>
+          <p class="muted small">Review and correct it before you file it on <a href="https://cybercrime.gov.in" target="_blank" rel="noopener">cybercrime.gov.in</a>.</p>
+          <pre class="draft" id="rDraft"></pre></div>
+        <div class="card stack"><h2>Reminders</h2>
+          <p class="muted small">Pick the follow-ups you want. The full product asks permission first and sends them as notifications.</p>
+          <div class="row" id="rRem"></div>
+          <p class="small" id="rRemOut" aria-live="polite"></p></div>
+      </div>
+    </section>
+
+    <!-- SECOND SCAM -->
+    <section class="mod" id="m-second" hidden>
+      <div><div class="eyebrow">Beyond fraud</div><h1>Second-scam protection</h1>
+      <p class="lede">People who have lost money are often contacted again by someone offering to get it back. Paste any follow-up message to check it against the known patterns.</p></div>
+      <div class="grid2">
+        <div class="card stack">
+          <div><span class="label">Try a sample</span><div class="row" id="ssSamples"></div></div>
+          <div><label class="label" for="ssText">Follow-up message</label><textarea id="ssText" spellcheck="false"></textarea></div>
+          <label class="row" style="flex-wrap:nowrap;align-items:flex-start"><input type="checkbox" id="ssCtx" checked style="width:18px;height:18px;margin-top:3px;accent-color:var(--accent)"><span class="small">Use my reported incident as context. <span class="muted">Only with your permission. Switch off to analyze the message alone.</span></span></label>
+          <div><button class="btn" id="ssGo">Check message</button></div>
+        </div>
+        <div class="stack" id="ssOut"></div>
+      </div>
+    </section>
+
+    <!-- FAMILY -->
+    <section class="mod" id="m-family" hidden>
+      <div><div class="eyebrow">Beyond fraud</div><h1>Family cyber safety network</h1>
+      <p class="lede">Ask someone you trust for help, and decide exactly what they see. Nothing is monitored or shared by default.</p></div>
+      <div class="grid2">
+        <div class="card stack">
+          <h2>Trusted contacts</h2>
+          <div class="row" id="fContacts"></div>
+          <div class="row" style="flex-wrap:nowrap"><input type="text" id="fNew" placeholder="Add a name, e.g. Meera (sister)" aria-label="New trusted contact"><button class="btn ghost" id="fAdd">Add</button></div>
+          <h2 style="margin-top:6px">Share with <span id="fWho"></span></h2>
+          <div id="fToggles"></div>
+          <div class="row"><button class="btn" id="fAsk">Ask for help</button><button class="btn ghost" id="fRevoke">Stop sharing</button></div>
+        </div>
+        <div class="stack">
+          <div class="card stack"><h2>What they would receive</h2><div class="phone" id="fPhone"></div><p class="small muted" id="fNote"></p></div>
+        </div>
+      </div>
+      <div class="card stack" id="fSenior"></div>
+    </section>
+
+    <!-- SIMULATOR -->
+    <section class="mod" id="m-simulate" hidden>
+      <div><div class="eyebrow">Beyond fraud</div><h1>Scam awareness simulator</h1>
+      <p class="lede">Three realistic scenarios. Choose what you would do, see what happens, and compare your confidence before and after.</p></div>
+      <div class="card stack" id="simBox" style="max-width:760px"></div>
+    </section>
+  </main>
+</div>
+
+<script>
+(function(){
+"use strict";
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const LV={critical:'Critical',high:'High',medium:'Medium',low:'Low'};
+const RANK={low:0,medium:1,high:2,critical:3};
+const pill=l=>'<span class="pill lv-'+l+'">'+LV[l]+'</span>';
+function flash(btn,msg){const o=btn.dataset.o||btn.textContent;btn.dataset.o=o;btn.textContent=msg;setTimeout(()=>{btn.textContent=o},1600)}
+async function copyText(text,btn,pre){
+  try{await navigator.clipboard.writeText(text);flash(btn,'Copied');}
+  catch(e){ if(pre){const r=document.createRange();r.selectNodeContents(pre);const s=getSelection();s.removeAllRanges();s.addRange(r);} flash(btn,'Selected, press copy'); }
+}
+
+/* ============ engine ============ */
+const TACTICS={
+  impersonation:{label:'Impersonates an institution',sign:'The sender claims to be an official or an institution. A name or caller ID is not proof of identity.',re:/calling from|i am from|this is .{0,30} from|customer care|security department|officer|inspector|executive|cyber ?crime|crime branch|\bcbi\b|\brbi\b|\btrai\b|income tax|fedex|dhl|recovery cell|bank team/i},
+  urgency:{label:'Creates urgency',sign:'It pushes you to act within minutes, so you cannot stop and check.',re:/block(ed)?|suspend|within \d+\s*(min|hour)|immediately|right now|no time|turant|abhi\b|jaldi|expire|agutte|aagide|band ho|today only|last chance|deadline/i},
+  fear:{label:'Uses fear or threat',sign:'It threatens arrest, blocking or legal action. Real agencies do not do this over chat or video call.',re:/arrest|warrant|police|\bcbi\b|narcotics|customs|court|legal action|\bfir\b|jail|illegal|penalty|blackmail/i},
+  lure:{label:'Offers a reward or refund',sign:'It offers money, a refund or a job you did not ask for.',re:/refund|cashback|reward|lottery|prize|you (have )?won|gift|work from home|part.?time|per day|\bearn|guaranteed|double|high returns|profit|commission/i},
+  secrecy:{label:'Demands secrecy or staying on the call',sign:'It tells you to stay on the line or keep quiet, so nobody can warn you.',re:/do not (tell|disconnect)|don'?t (tell|disconnect|cut)|stay on (the )?(call|line|video)|confidential|keep (this )?secret|mat batana/i}
+};
+const REQ=/\b(tell|share|send|give|enter|read|confirm|heli|batao|bataiye|kijiye|dijiye|bhejiye)\b/i;
+const ACTIONS={
+  otp:{label:'Share an OTP',risk:'Account takeover or an unauthorised payment',w:45,re:/\botp\b|one.?time (password|pin)|ओटीपी|ಒಟಿಪಿ/i,safe:'Do not share the OTP. End the conversation and call your bank on the number printed on your card or in its official app.'},
+  upipin:{label:'Enter a UPI PIN',risk:'Unauthorised payment from your account',w:45,re:/upi\s*-?pin|\bm-?pin\b|enter (your )?pin|\bpin\b/i,safe:'Never enter your UPI PIN to receive money. The PIN is only for sending. Stop and check the claim in your own payment app.'},
+  apk:{label:'Install an app or APK',risk:'Malware or takeover of your phone',w:35,re:/\.apk|\bapk\b|\binstall|download (the )?app|quick ?support|any ?desk|team ?viewer|rustdesk/i,safe:'Do not install anything from a link or a caller. Hang up and block the number.'},
+  screen:{label:'Share your screen',risk:'Remote access to your banking apps',w:35,re:/screen ?shar|any ?desk|team ?viewer|quick ?support|rustdesk|remote access/i,safe:'Never share your screen or allow remote access to someone who contacted you.'},
+  qr:{label:'Scan a QR code',risk:'Scanning pays money out. It never brings money in',w:25,re:/\bqr\b|scan (the|this|karo|kijiye)/i,safe:'Do not scan. Money arrives without you scanning or entering anything.'},
+  transfer:{label:'Transfer money',risk:'Direct financial loss',w:35,re:/transfer|send (₹|rs|money)|pay (₹|rs\.?)?\s?\d|processing fee|registration fee|security deposit|clearance|bhej(o|iye|na)?\b|deposit/i,safe:'Do not send money. Check the person or the fee through an official channel that you find yourself.'},
+  docs:{label:'Share identity documents',risk:'Identity misuse and loan fraud',w:25,re:/aadhaar|aadhar|pan card|\bpan\b|passport|selfie|id proof|bank statement/i,safe:'Do not send documents. Ask for the request in writing from the organisation’s official website.'}
+};
+const GLOSS={nimma:'your',agutte:'will happen',aagide:'has become',heli:'tell',madi:'do',aapka:'your',aapki:'your',kijiye:'please do',batao:'tell',bataiye:'tell',turant:'immediately',abhi:'now',karein:'do',band:'closed',jayega:'will go'};
+const KN=/agutte|aagide|nimma|\bmadi\b|\bheli\b|[ಀ-೿]/i, HI=/aapka|aapki|ho jayega|kijiye|batao|bataiye|turant|[ऀ-ॿ]/i;
+const LINK=/(https?:\/\/[^\s]+)|(\b[a-z0-9-]+(\.[a-z0-9-]+)*\.(in|com|co|xyz|top|online|site|app)\b\/[^\s]*)/i;
+const SAFE_SHARE=/(do not|don'?t|never) share( it)?( with anyone)?/gi;
+
+function analyze(raw){
+  const t=raw.replace(SAFE_SHARE,' ');
+  const tactics=Object.keys(TACTICS).filter(k=>TACTICS[k].re.test(t));
+  const actions=Object.keys(ACTIONS).filter(k=>ACTIONS[k].re.test(t)&&(k!=='otp'||REQ.test(t)));
+  let score=tactics.length*12+actions.reduce((s,k)=>s+ACTIONS[k].w,0);
+  if(tactics.includes('impersonation')&&(tactics.includes('urgency')||tactics.includes('fear')))score+=15;
+  score=Math.min(100,score);
+  const level=score>=55?'critical':score>=30?'high':score>=10?'medium':'low';
+  let category='No scam pattern found';
+  const has=r=>r.test(t);
+  if(tactics.length||actions.length){
+    if(has(/arrest|\bcbi\b|narcotics|customs|digital arrest/i))category='Digital arrest or authority threat';
+    else if(has(/recover|get your money back|recovery cell/i)&&has(/fee|charge/i))category='Recovery scam';
+    else if(has(/work from home|part.?time|per day|task|job/i))category='Fake job offer';
+    else if(has(/investment|returns|profit|trading|double/i))category='Investment fraud';
+    else if(has(/refund|cashback/i)&&(actions.includes('upipin')||actions.includes('qr')||actions.includes('otp')))category='UPI refund scam';
+    else if(has(/courier|parcel|fedex|dhl/i))category='Courier scam';
+    else if(has(/kyc|bank|account|sbi|hdfc|icici|block/i))category='Bank impersonation or KYC fraud';
+    else category='Suspicious request';
+  }
+  const link=raw.match(LINK);
+  return {tactics,actions,score,level,category,link:link?link[0]:null,lang:KN.test(raw)?'Kannada-English':HI.test(raw)?'Hindi-English':'English'};
+}
+function highlight(raw){
+  const all=[...Object.values(TACTICS),...Object.values(ACTIONS)].map(o=>o.re.source).join('|');
+  const re=new RegExp(all,'gi');let out='',last=0,m;
+  while((m=re.exec(raw))){ if(!m[0]){re.lastIndex++;continue;} out+=esc(raw.slice(last,m.index))+'<mark class="hl">'+esc(m[0])+'</mark>'; last=m.index+m[0].length; }
+  return out+esc(raw.slice(last));
+}
+function gloss(raw){return raw.replace(/\b[a-z]+\b/gi,w=>GLOSS[w.toLowerCase()]||w)}
+
+const I18N={
+ en:{otp:'Never share an OTP. No bank or agency asks for it.',upipin:'The UPI PIN is only for sending money, never for receiving it.',apk:'Do not install apps from a caller or a link.',screen:'Do not share your screen with someone who contacted you.',qr:'You never need to scan a QR code to receive money.',transfer:'Do not send money to someone you cannot verify.',docs:'Do not send Aadhaar or PAN photos to a stranger.',none:'No scam pattern found. Stay careful anyway.',call:'Call your bank on the number on your card. If money is gone, call 1930.'},
+ hi:{otp:'OTP किसी को न बताएं। कोई बैंक या विभाग इसे नहीं मांगता।',upipin:'UPI PIN सिर्फ पैसे भेजने के लिए है, पैसे पाने के लिए नहीं।',apk:'फोन करने वाले या किसी लिंक से ऐप इंस्टॉल न करें।',screen:'अनजान व्यक्ति के साथ अपनी स्क्रीन शेयर न करें।',qr:'पैसे पाने के लिए QR स्कैन करने की ज़रूरत नहीं होती।',transfer:'जिसे आप जांच नहीं सकते, उसे पैसे न भेजें।',docs:'आधार या पैन की फोटो अनजान व्यक्ति को न भेजें।',none:'कोई ठगी का पैटर्न नहीं मिला। फिर भी सावधान रहें।',call:'बैंक को कार्ड के पीछे लिखे नंबर पर कॉल करें। पैसे कट गए हों तो 1930 पर कॉल करें।'},
+ kn:{otp:'OTP ಯಾರಿಗೂ ಹೇಳಬೇಡಿ. ಯಾವ ಬ್ಯಾಂಕ್ ಅಥವಾ ಇಲಾಖೆಯೂ ಕೇಳುವುದಿಲ್ಲ.',upipin:'UPI PIN ಹಣ ಕಳುಹಿಸಲು ಮಾತ್ರ, ಹಣ ಪಡೆಯಲು ಅಲ್ಲ.',apk:'ಕರೆ ಮಾಡಿದವರು ಅಥವಾ ಲಿಂಕ್‌ನಿಂದ ಆ್ಯಪ್ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಬೇಡಿ.',screen:'ಅಪರಿಚಿತರೊಂದಿಗೆ ನಿಮ್ಮ ಸ್ಕ್ರೀನ್ ಶೇರ್ ಮಾಡಬೇಡಿ.',qr:'ಹಣ ಪಡೆಯಲು QR ಸ್ಕ್ಯಾನ್ ಮಾಡುವ ಅಗತ್ಯವಿಲ್ಲ.',transfer:'ಪರಿಶೀಲಿಸಲಾಗದವರಿಗೆ ಹಣ ಕಳುಹಿಸಬೇಡಿ.',docs:'ಆಧಾರ್ ಅಥವಾ ಪ್ಯಾನ್ ಫೋಟೋವನ್ನು ಅಪರಿಚಿತರಿಗೆ ಕಳುಹಿಸಬೇಡಿ.',none:'ಯಾವುದೇ ವಂಚನೆಯ ಲಕ್ಷಣ ಕಂಡುಬಂದಿಲ್ಲ. ಆದರೂ ಎಚ್ಚರಿಕೆಯಿಂದಿರಿ.',call:'ಕಾರ್ಡ್ ಹಿಂಭಾಗದ ಸಂಖ್ಯೆಗೆ ಬ್ಯಾಂಕ್‌ಗೆ ಕರೆ ಮಾಡಿ. ಹಣ ಹೋಗಿದ್ದರೆ 1930 ಗೆ ಕರೆ ಮಾಡಿ.'}
+};
+
+/* ============ shell ============ */
+const MODS=[
+ {id:'overview',label:'Overview',group:''},
+ {id:'analyze',label:'Scam and intent analyzer',group:'Before and during'},
+ {id:'journey',label:'Scam journey predictor',group:'Before and during'},
+ {id:'verify',label:'Trust verification',group:'Before and during'},
+ {id:'timeline',label:'Evidence timeline',group:'After'},
+ {id:'recovery',label:'Recovery assistant',group:'After'},
+ {id:'second',label:'Second-scam protection',group:'Beyond'},
+ {id:'family',label:'Family safety',group:'Beyond'},
+ {id:'simulate',label:'Scam simulator',group:'Beyond'}];
+const DEMO=['analyze','journey','verify','timeline','recovery','second'];
+const DEMO_LABEL={analyze:'Analyze',journey:'Predict',verify:'Verify',timeline:'Investigate',recovery:'Recover',second:'Protect'};
+const S={demo:false};
+const label=id=>MODS.find(m=>m.id===id).label;
+
+(function nav(){
+  let h='',g=null;
+  MODS.forEach(m=>{ if(m.group&&m.group!==g){h+='<div class="grp">'+m.group+'</div>';g=m.group} h+='<a href="#'+m.id+'" data-id="'+m.id+'">'+m.label+'</a>'; });
+  $('#nav').innerHTML=h;
+  $('#lifeGrid').innerHTML=[
+    ['Before and during fraud','Detect, predict, verify, intervene.',['analyze','journey','verify'],['Read the requested action and the tactics.','Place the call on the scam journey and predict the next step.','Check who is really contacting you.']],
+    ['After fraud','Investigate, report, recover.',['timeline','recovery'],['Rebuild the incident from your evidence.','Get a prioritized plan, a complaint draft and reminders.']],
+    ['Beyond fraud','Protect, educate, prevent repeat harm.',['second','family','simulate'],['Spot fake recovery agents and refund offers.','Ask family for help, with consent.','Practice on realistic scams.']]
+  ].map(c=>'<div class="card life"><h2>'+c[0]+'</h2><p class="muted small" style="margin:4px 0 8px">'+c[1]+'</p>'+c[2].map((id,i)=>'<a class="item" href="#'+id+'"><b>'+label(id)+'</b><span class="small muted">'+c[3][i]+'</span></a>').join('')+'</div>').join('');
+})();
+
+function currentId(){const id=(location.hash||'#overview').slice(1);return MODS.some(m=>m.id===id)?id:'overview'}
+function route(){
+  const id=currentId();
+  $$('.mod').forEach(s=>s.hidden=(s.id!=='m-'+id));
+  $$('#nav a').forEach(a=>a.setAttribute('aria-current',a.dataset.id===id?'page':'false'));
+  renderDemoBar(id);
+  const a=$('#nav a[aria-current="page"]'); if(a&&a.scrollIntoView&&innerWidth<=900)a.scrollIntoView({inline:'center',block:'nearest'});
+  try{window.scrollTo(0,0)}catch(e){}
+}
+function renderDemoBar(id){
+  const bar=$('#demobar'); const i=DEMO.indexOf(id);
+  if(!S.demo||i<0){bar.hidden=true;return}
+  bar.hidden=false;
+  bar.innerHTML='<div class="steps">'+DEMO.map((d,j)=>'<span class="st'+(j===i?' on':j<i?' done':'')+'">'+(j+1)+'. '+DEMO_LABEL[d]+'</span>').join('')+'</div>'+
+    '<button id="dBack"'+(i===0?' disabled':'')+'>Back</button><button class="go" id="dNext">'+(i===DEMO.length-1?'Finish demo':'Next step')+'</button><button id="dExit">Exit</button>';
+  $('#dBack').onclick=()=>{location.hash=DEMO[i-1]};
+  $('#dNext').onclick=()=>{ if(i===DEMO.length-1){S.demo=false;location.hash='overview'} else location.hash=DEMO[i+1] };
+  $('#dExit').onclick=()=>{S.demo=false;renderDemoBar(id)};
+}
+addEventListener('hashchange',route);
+
+/* ============ analyzer ============ */
+const SAMPLES=[
+ {k:'Bank OTP call',t:'Hello sir, I am calling from SBI security department. Your account will be blocked in 10 minutes. Tell me the OTP you just received to verify your account.'},
+ {k:'Kannada-English',t:'Nimma bank account block agutte, OTP heli. Your KYC expire aagide, immediately update madi.'},
+ {k:'Hindi-English',t:'Aapka account band ho jayega. Turant OTP share kijiye aur is link se app install karein: http://sbi-kyc-help.in/app.apk'},
+ {k:'UPI refund',t:'Sir, you have a refund of ₹2,000 pending. Scan the QR code and enter your UPI PIN to receive it.'},
+ {k:'Digital arrest',t:'This is Inspector Verma from Mumbai Crime Branch. A parcel in your name with illegal items was found by customs. You are under digital arrest. Stay on video call, do not tell anyone, and transfer ₹50,000 for clearance.'},
+ {k:'Genuine OTP SMS',t:'482913 is your OTP for a payment of ₹450 at Amazon. Do not share it with anyone, including bank staff.'}];
+const A={lang:'en'};
+(function(){
+  $('#samples').innerHTML=SAMPLES.map((s,i)=>'<button class="chip-btn" data-i="'+i+'">'+s.k+'</button>').join('');
+  $('#samples').onclick=e=>{const b=e.target.closest('button');if(!b)return;$('#anaText').value=SAMPLES[+b.dataset.i].t;runAnalyze()};
+  $('#anaGo').onclick=runAnalyze;
+  $('#anaText').value=SAMPLES[0].t;
+})();
+function runAnalyze(){
+  const raw=$('#anaText').value.trim(); const out=$('#anaOut');
+  if(!raw){out.innerHTML='<div class="card"><p class="muted">Paste a message or choose a sample to see the analysis.</p></div>';return}
+  const a=analyze(raw);
+  const acts=a.actions.map(k=>'<span class="chip act">'+ACTIONS[k].label+'</span>').join(' ')||'<span class="muted small">None found</span>';
+  const tacs=a.tactics.map(k=>'<span class="chip tac">'+TACTICS[k].label+'</span>').join(' ')||'<span class="muted small">None found</span>';
+  const signs=a.tactics.map(k=>TACTICS[k].sign);
+  a.actions.forEach(k=>signs.push('Asks you to <b>'+ACTIONS[k].label.toLowerCase()+'</b>. Risk: '+ACTIONS[k].risk.toLowerCase()+'.'));
+  if(a.link){signs.push('Contains a link ('+esc(a.link.length>46?a.link.slice(0,46)+'…':a.link)+'). Open official sites by typing the address yourself, never from a message.')}
+  const safe=a.actions.length?ACTIONS[a.actions[0]].safe:(a.level==='low'?'No scam pattern found. This is a demo engine, so stay careful with anything unexpected.':'Do not click or reply. Check the claim in the official app or website that you open yourself.');
+  const showGloss=a.lang!=='English';
+  out.innerHTML=
+   '<div class="card stack lv-'+a.level+'"><div class="risk-top"><div><span class="label">Suspected category</span><h2>'+a.category+'</h2></div>'+pill(a.level)+'</div>'+
+   '<div><div class="meter" role="img" aria-label="Risk score '+a.score+' of 100"><span style="width:'+Math.max(a.score,3)+'%"></span></div><div class="row small muted" style="justify-content:space-between;margin-top:4px"><span>Risk score</span><span class="mono">'+a.score+' / 100</span></div></div>'+
+   '<div class="quote">'+highlight(raw)+'</div>'+
+   '<div><span class="label">Action the sender wants</span><div class="row">'+acts+'</div></div>'+
+   '<div><span class="label">Tactics detected</span><div class="row">'+tacs+'</div></div>'+
+   (showGloss?'<div class="dashed small"><span class="label">Language: '+a.lang+' (rough normalised reading)</span>'+esc(gloss(raw))+'</div>':'')+'</div>'+
+   (signs.length?'<div class="card stack"><h2>Warning signs</h2><ul class="plain">'+signs.map(s=>'<li>'+s+'</li>').join('')+'</ul></div>':'')+
+   '<div class="callout lv-'+(a.level==='low'?'low':'low')+'" style="--lv:var(--ok);--lv-soft:var(--ok-soft)"><b>What to do</b>'+safe+'</div>'+
+   '<div class="card stack"><div class="risk-top"><h2>In your language</h2><div class="seg" id="langSeg" role="group" aria-label="Language"><button data-l="en">English</button><button data-l="hi" lang="hi">हिन्दी</button><button data-l="kn" lang="kn">ಕನ್ನಡ</button></div></div><div class="lang-box" id="langBox" aria-live="polite"></div></div>';
+  const paint=()=>{
+    $$('#langSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.l===A.lang));
+    const d=I18N[A.lang]; const parts=a.actions.length?a.actions.slice(0,3).map(k=>d[k]).concat(d.call):[a.level==='low'?d.none:d.call];
+    const box=$('#langBox'); box.lang=A.lang; box.innerHTML=parts.map(p=>'<p>'+p+'</p>').join('');
+  };
+  $('#langSeg').onclick=e=>{const b=e.target.closest('button');if(!b)return;A.lang=b.dataset.l;paint()};
+  paint();
+}
+
+/* ============ journey ============ */
+const JM=[
+ {who:'caller',text:'Hello sir, I am calling from SBI security department. We noticed suspicious activity on your account.'},
+ {who:'caller',text:'Your account will be blocked within 10 minutes unless you complete verification now.'},
+ {who:'caller',text:'Please tell me the OTP you just received so I can verify your account.'},
+ {who:'you',text:'This feels strange. Can I call the bank back instead?'},
+ {who:'caller',text:'There is no time, sir. Install QuickSupport from this link and do not disconnect the call.'},
+ {who:'caller',text:'Now enter your UPI PIN to cancel the unauthorised ₹9,800 debit.'}];
+const STAGES=['Impersonation','Fear or urgency','Credential request','Remote access or payment','Pressure to complete','Follow-up exploitation'];
+const PRED={
+ 1:'Expect fear or urgency next, such as a warning that your account will be blocked.',
+ 2:'Expect a request for an OTP, PIN or document, with the clock running.',
+ 3:'Expect a payment authorisation, a remote-access app or a request for banking credentials.',
+ 4:'Expect pressure to stay on the line and finish the payment before you can check.',
+ 5:'Expect follow-up exploitation. If money leaves your account, someone may offer to recover it for a fee.'};
+const J={n:2,fresh:true};
+function stagesOf(a){const s=[];if(a.tactics.includes('impersonation'))s.push(1);if(a.tactics.includes('urgency')||a.tactics.includes('fear'))s.push(2);
+  if(['otp','upipin','docs'].some(k=>a.actions.includes(k)))s.push(3);if(['apk','screen','qr','transfer'].some(k=>a.actions.includes(k)))s.push(4);if(a.tactics.includes('secrecy'))s.push(5);return s}
+function firstHigh(fn){for(let i=0;i<JM.length;i++){if(JM[i].who!=='caller')continue;if(RANK[fn(i).level]>=2)return i+1}return null}
+const baseHigh=firstHigh(i=>analyze(JM[i].text));
+const seqHigh=firstHigh(i=>analyze(JM.slice(0,i+1).filter(m=>m.who==='caller').map(m=>m.text).join(' ')));
+function renderJourney(){
+  const shown=JM.slice(0,J.n);
+  $('#jChat').innerHTML=shown.map((m,i)=>{
+    let chips='';
+    if(m.who==='caller'){const a=analyze(m.text);chips=a.tactics.map(k=>'<span class="chip tac">'+TACTICS[k].label+'</span>').concat(a.actions.map(k=>'<span class="chip act">'+ACTIONS[k].label+'</span>')).join('')}
+    return '<div class="msg '+m.who+(i===J.n-1&&!J.fresh?' new':'')+'"><div class="who">'+(m.who==='caller'?'Caller · message '+(i+1):'You')+'</div>'+esc(m.text)+(chips?'<div class="chips">'+chips+'</div>':'')+'</div>'}).join('');
+  const seen=new Set();shown.forEach(m=>{if(m.who==='caller')stagesOf(analyze(m.text)).forEach(s=>seen.add(s))});
+  const hi=seen.size?Math.max(...seen):0;
+  const lvl=hi>=3?'critical':hi===2?'high':hi===1?'medium':'low';
+  const cum=analyze(shown.filter(m=>m.who==='caller').map(m=>m.text).join(' '));
+  const next=hi&&hi<6?hi+1:0;
+  const interv=hi>=3?{l:'critical',h:'Stop now',b:'End the call. Do not share the OTP, install anything or enter a PIN. Call your bank on the number printed on your card. If money has left your account, call 1930.'}:
+     hi===2?{l:'high',h:'Pause and verify',b:'A real bank does not threaten you with a deadline. Hang up and call the bank yourself.'}:
+     hi===1?{l:'medium',h:'Be careful',b:'You cannot confirm who this is. Do not share anything. Offer to call back on an official number.'}:null;
+  $('#jOut').innerHTML=
+   '<div class="card stack lv-'+lvl+'"><div class="risk-top"><div><span class="label">Journey risk</span><h2>'+(hi?'Stage '+hi+': '+STAGES[hi-1]:'No stage yet')+'</h2></div>'+pill(lvl)+'</div>'+
+   '<div class="stack" style="gap:4px">'+STAGES.map((s,i)=>{const n=i+1;const c=seen.has(n)?'seen':n===next?'next':'';return '<div class="stage '+c+'"><i>'+n+'</i><span>'+s+'</span><span class="t">'+(seen.has(n)?'seen':n===next?'predicted':'')+'</span></div>'}).join('')+'</div></div>'+
+   (next?'<div class="dashed stack" style="gap:6px"><span class="label">Prediction for the next move</span><p>'+PRED[hi]+'</p><p class="small muted">An estimate from the detected pattern, not a verified fact.</p></div>':hi?'':'')+
+   (interv?'<div class="callout lv-'+interv.l+'"><b>'+interv.h+'</b>'+interv.b+'</div>':'')+
+   '<div class="card stack"><h2>Why read the whole sequence?</h2><div class="compare"><div><span class="label">One message at a time</span><b>'+(baseHigh?'High at message '+baseHigh:'Never high')+'</b></div><div><span class="label">Whole conversation</span><b>'+(seqHigh?'High at message '+seqHigh:'Never high')+'</b></div></div>'+
+   '<p class="small muted">On this one sample call, reading the conversation as a sequence warns one message sooner. A fair test needs a labelled dataset and baseline models. Treat this as an illustration.</p></div>';
+  $('#jNext').disabled=J.n>=JM.length;
+  J.fresh=false;
+}
+$('#jNext').onclick=()=>{if(J.n<JM.length){J.n++;renderJourney()}};
+$('#jReset').onclick=()=>{J.n=1;J.fresh=true;renderJourney()};
+
+/* ============ verify ============ */
+const DIR={
+ sbi:{name:'State Bank of India',domains:['sbi.co.in','onlinesbi.sbi'],kw:['sbi'],channel:'Use the customer-care number printed on your card or passbook, or the bank’s official app. Never use a number from a message or a search ad.'},
+ hdfc:{name:'HDFC Bank',domains:['hdfcbank.com'],kw:['hdfc'],channel:'Use the number printed on your card or the bank’s official app. Never use a number from a message or a search ad.'},
+ icici:{name:'ICICI Bank',domains:['icicibank.com'],kw:['icici'],channel:'Use the number printed on your card or the bank’s official app. Never use a number from a message or a search ad.'},
+ it:{name:'Income Tax Department',domains:['incometax.gov.in'],kw:['incometax','income-tax'],channel:'Type the address yourself and use the portal’s help section. The department does not ask for OTPs or card details on calls.'},
+ police:{name:'Police, CBI or Customs',domains:['cbi.gov.in'],kw:['cbi','police','customs'],channel:'No agency arrests or questions people over a video call or takes money to close a case. Walk into your local police station, or dial 112 in an emergency.'},
+ amazon:{name:'Amazon India',domains:['amazon.in'],kw:['amazon'],channel:'Open the Amazon app and go to Customer Service, or type the address yourself.'},
+ courier:{name:'FedEx or DHL',domains:['fedex.com','dhl.com'],kw:['fedex','dhl'],channel:'Track using the number on your own receipt, at the official site you type yourself. Couriers do not ask for payment to release a parcel by phone.'},
+ cyber:{name:'Cyber Crime Portal',domains:['cybercrime.gov.in'],kw:['cybercrime'],channel:'Report financial fraud on the portal and by calling 1930. Genuine officers never ask for a fee or an OTP.'}
+};
+const ASK={otp:['Share an OTP','No bank, agency or company needs your OTP from you.'],pin:['Enter a PIN or password','A PIN is only for you to approve your own payments.'],money:['Send or deposit money','Genuine bodies do not collect money to close a case, release a parcel or clear a refund over a call.'],app:['Install an app','Remote-access and APK installs are how phones get taken over.'],link:['Open a link','Links in messages can be look-alikes. Type official addresses yourself.']};
+(function(){
+  $('#vOrg').innerHTML=Object.keys(DIR).map(k=>'<option value="'+k+'">'+DIR[k].name+'</option>').join('');
+  $('#vAsk').innerHTML=Object.keys(ASK).map(k=>'<label><input type="checkbox" value="'+k+'"'+(k==='otp'||k==='link'?' checked':'')+' style="accent-color:var(--accent)">'+ASK[k][0]+'</label>').join('');
+  $('#dirTable').innerHTML='<thead><tr><th>Organisation</th><th>Official websites</th><th>Source</th><th>Last verified</th></tr></thead><tbody>'+Object.values(DIR).map(d=>'<tr><td>'+d.name+'</td><td class="mono">'+d.domains.join(', ')+'</td><td>Organisation’s own site</td><td>Demo data</td></tr>').join('')+'</tbody>';
+  ['#vOrg','#vCh','#vAsk','#vDom'].forEach(s=>{$(s).addEventListener('input',renderVerify);$(s).addEventListener('change',renderVerify)});
+})();
+function domainCheck(input,org){
+  const d=input.trim().toLowerCase().replace(/^https?:\/\//,'').replace(/^www\./,'').split(/[\/?#]/)[0]; if(!d)return null;
+  if(org.domains.some(o=>d===o||d.endsWith('.'+o)))return {state:'match',d};
+  return {state:org.kw.some(k=>d.includes(k))?'lookalike':'unknown',d};
+}
+function renderVerify(){
+  const org=DIR[$('#vOrg').value]; const ch=$('#vCh').value; const asks=$$('#vAsk input:checked').map(i=>i.value);
+  const chn={call:'A caller ID can be faked, so the number you see proves nothing.',sms:'Sender names on messages can be imitated and can appear inside genuine message threads.',wa:'Anyone can use a bank’s logo and name as a WhatsApp profile.',mail:'Display names and logos in email are easy to copy.'}[ch];
+  const dc=$('#vDom').value?domainCheck($('#vDom').value,org):null;
+  let dHtml='';
+  if(dc){const m={match:['low','Matches the directory','This address is listed for '+org.name+'. Still, open it by typing it yourself rather than from a link.'],lookalike:['critical','Look-alike address','It contains the name of '+org.name+' but is not one of its official addresses ('+org.domains.join(', ')+'). Do not open it.'],unknown:['high','Not in the directory','It is not an address listed for '+org.name+'. Treat it as unverified.']}[dc.state];
+    dHtml='<div class="callout lv-'+m[0]+'"><b>'+m[1]+': <span class="mono">'+esc(dc.d)+'</span></b>'+m[2]+'</div>'}
+  $('#vOut').innerHTML=
+   '<div class="card stack lv-high"><div class="risk-top"><div><span class="label">Identity of the contact</span><h2>Not verified</h2></div>'+pill('high')+'</div>'+
+   '<p>Nothing you have told us can confirm that this person works for '+esc(org.name)+'. '+chn+'</p>'+
+   (asks.length?'<div><span class="label">Red flags in what they asked</span><ul class="plain">'+asks.map(k=>'<li><b>'+ASK[k][0]+'.</b> '+ASK[k][1]+'</li>').join('')+'</ul></div>':'<p class="muted small">Tick what they asked you to do to see the red flags.</p>')+'</div>'+
+   dHtml+
+   '<div class="card stack"><h2>Check it yourself</h2><p>'+org.channel+'</p><div class="row">'+org.domains.map(d=>'<a class="chip" href="https://'+d+'" target="_blank" rel="noopener">'+d+'</a>').join('')+'</div>'+
+   '<p class="small muted">Say you will call back, hang up, then contact them on a channel you found yourself.</p></div>';
+}
+
+/* ============ timeline ============ */
+const EV=[
+ {day:1,time:'09:12',type:'SMS',from:'98XXX 41207',text:'Dear customer, your SBI KYC expires today. Update now: http://sbi-kyc-update.in/login'},
+ {day:1,time:'09:20',type:'WhatsApp',from:'98XXX 41207',text:'Sir, I am Rakesh from SBI security. Your account will be blocked in 10 minutes. Please call me.'},
+ {day:1,time:'09:26',type:'Call transcript',from:'98XXX 41207',text:'Tell me the OTP you just received. Install QuickSupport and do not disconnect the call. Now enter your UPI PIN to cancel the ₹9,800 debit.'},
+ {day:1,time:'09:39',type:'Payment screenshot',from:'Rewards Desk (UPI)',text:'UPI debit ₹9,800. Ref 6102XXXXX482. Status: Successful.'},
+ {day:2,time:'10:15',type:'WhatsApp',from:'70XXX 55318',text:'I am from the Cyber Crime Recovery cell. Pay a processing fee of ₹4,500 and your ₹9,800 will be returned within 24 hours.'}];
+const mins=e=>e.day*1440+(+e.time.slice(0,2))*60+(+e.time.slice(3,5));
+const fmtGap=m=>m<60?m+' minutes':m<1440?Math.round(m/60)+' hours':Math.round(m/1440)+' day(s)';
+function tlRender(){
+  EV.sort((a,b)=>mins(a)-mins(b));
+  const items=EV.map((e,i)=>{
+    const a=analyze(e.text),ss=secondScam(e.text);const inf=[];
+    const isPay=/payment/i.test(e.type);
+    let stage='Contact';
+    if(isPay){stage='Financial loss'}else if(ss.matches.length){stage='Follow-up exploitation'}else if(a.actions.length){stage='Credential or payment request'}else if(i===0){stage='Initial contact'}else if(a.tactics.includes('urgency')||a.tactics.includes('fear')){stage='Fear creation'}
+    const prevSame=EV.slice(0,i).findIndex(p=>p.from===e.from);
+    if(prevSame>-1)inf.push('Same sender as event '+(prevSame+1)+' ('+esc(e.from)+').');
+    const lk=e.text.match(LINK);
+    if(lk){const org=Object.values(DIR).find(o=>o.kw.some(k=>lk[0].toLowerCase().includes(k)));const dd=lk[0].replace(/^https?:\/\//,'').split(/[\/?#]/)[0];if(org){const r=domainCheck(dd,org);if(r.state==='lookalike')inf.push('Link domain <span class="mono">'+esc(dd)+'</span> imitates '+org.name+' and is not an official address.')}}
+    if(isPay){const call=[...EV.slice(0,i)].reverse().find(p=>/call/i.test(p.type));if(call)inf.push('Money left '+fmtGap(mins(e)-mins(call))+' after the call at '+call.time+'. This fits the PIN and remote-app request in event '+(EV.indexOf(call)+1)+'.')}
+    if(ss.matches.length){const pay=EV.slice(0,i).find(p=>/payment/i.test(p.type));if(pay)inf.push('Arrived '+fmtGap(mins(e)-mins(pay))+' after the payment in event '+(EV.indexOf(pay)+1)+'. '+ss.matches.map(m=>m.k).join(', ')+'.');else inf.push(ss.matches.map(m=>m.k).join(', ')+'.')}
+    const lvl=isPay?'critical':ss.matches.length?'high':a.level;
+    return {e,a,stage,inf,lvl,i};
+  });
+  $('#tlList').innerHTML=items.map(x=>
+   '<div class="ev lv-'+x.lvl+'"><div class="head"><span class="stg">'+x.stage+'</span>'+pill(x.lvl)+'<span class="mono small muted">Event '+(x.i+1)+'</span></div>'+
+   '<div class="reported"><div class="meta">Day '+x.e.day+' · '+x.e.time+' · '+esc(x.e.type)+' · from '+esc(x.e.from)+'</div>'+esc(x.e.text)+'</div>'+
+   '<div class="inferred dashed"><span class="label">Inferred by the engine</span>'+
+   '<div class="row">'+x.a.tactics.map(k=>'<span class="chip tac">'+TACTICS[k].label+'</span>').concat(x.a.actions.map(k=>'<span class="chip act">'+ACTIONS[k].label+'</span>')).join('')+'</div>'+
+   (x.inf.length?'<ul class="plain small" style="margin-top:8px">'+x.inf.map(s=>'<li>'+s+'</li>').join('')+'</ul>':'')+'</div></div>').join('');
+  const hasPay=items.some(x=>/payment/i.test(x.e.type)),hasRec=items.some(x=>secondScam(x.e.text).matches.length),hasBank=items.some(x=>x.a.actions.some(k=>['otp','upipin'].includes(k)));
+  const parts=[];if(hasBank)parts.push('a possible bank-impersonation sequence');if(hasPay)parts.push('a suspicious payment');if(hasRec)parts.push('a possible recovery scam');
+  const senders=new Set(EV.map(e=>e.from)).size;
+  $('#tlSummary').innerHTML='<div class="risk-top"><h2>Incident summary</h2><span class="chip">AI-inferred</span></div>'+
+   '<p>'+EV.length+' pieces of evidence from '+senders+' senders'+(parts.length?' appear consistent with '+parts.join(', then ').replace(/, then ([^,]*)$/,', then $1')+'.':' show no clear scam pattern.')+'</p>'+
+   '<p class="small muted">This is a reading of what you supplied, not a finding. Check each inferred link against your own records before you rely on it in a report.</p>';
+}
+$('#aAdd').onclick=()=>{
+  const text=$('#aText').value.trim(); if(!text){$('#aText').focus();return}
+  EV.push({day:+$('#aDay').value,time:$('#aTime').value||'12:00',type:$('#aType').value,from:$('#aFrom').value.trim()||'Unknown',text});
+  $('#aText').value='';tlRender();
+};
+
+/* ============ second scam ============ */
+const SS=[
+ {k:'Advance-fee recovery scam',why:'It asks you to pay first to get your money back. Genuine recovery never needs an upfront fee.',t:s=>/(fee|charge|processing|gst|tax|deposit|stamp)/i.test(s)&&/(refund|recover|return|get back|release|compensation|money back)/i.test(s)&&/(pay|send|transfer|deposit|\d)/i.test(s)},
+ {k:'Fake cybercrime or recovery officer',why:'Real police or cyber cells do not contact victims by WhatsApp to arrange recovery. Use the portal and your bank.',t:s=>/(cyber ?crime|recovery cell|cyber cell|inspector|officer|nodal)/i.test(s)&&/(case|complaint|fir|recover|money)/i.test(s)},
+ {k:'Fake refund officer',why:'Refunds are credited to you directly. They never need your OTP, PIN or a QR scan.',t:s=>/refund/i.test(s)&&/(otp|pin\b|qr|link|click)/i.test(s)},
+ {k:'Fraudulent legal representative',why:'A lawyer who contacts you first and asks for filing charges is a known trick on victims.',t:s=>/(advocate|lawyer|legal (team|expert|representative)|court order|compensation claim)/i.test(s)},
+ {k:'Fake government refund scheme',why:'Government bodies do not announce victim payouts by private message.',t:s=>/(government (scheme|refund|fund)|rbi.{0,25}(refund|compensation)|victim (relief|compensation)|ministry)/i.test(s)}
+];
+function secondScam(text){
+  const matches=SS.filter(r=>r.t(text)).map(r=>({k:r.k,why:r.why}));
+  const guar=/(guarantee|100%|within \d+ ?(hours|days)|assured|sure.?shot)/i.test(text);
+  return {matches,guar,level:matches.length>=2||(matches.length&&guar)?'critical':matches.length?'high':'low'};
+}
+const SSS=[
+ {k:'Recovery cell fee',t:'I am from the Cyber Crime Recovery cell. Pay a processing fee of ₹4,500 and your ₹9,800 will be returned within 24 hours.'},
+ {k:'Refund needs OTP',t:'RBI has approved a refund for victims of UPI fraud. Share the OTP sent to your phone to release the amount.'},
+ {k:'Lawyer offer',t:'I am an advocate. Our legal team will file a compensation claim in court and recover 3x your loss. Send ₹2,000 as filing charges.'},
+ {k:'Genuine acknowledgement',t:'Your complaint has been registered. Use your reference number to check the status at cybercrime.gov.in. We never ask for fees or OTPs.'}];
+(function(){
+  $('#ssSamples').innerHTML=SSS.map((s,i)=>'<button class="chip-btn" data-i="'+i+'">'+s.k+'</button>').join('');
+  $('#ssSamples').onclick=e=>{const b=e.target.closest('button');if(!b)return;$('#ssText').value=SSS[+b.dataset.i].t;runSS()};
+  $('#ssGo').onclick=runSS; $('#ssCtx').onchange=runSS; $('#ssText').value=SSS[0].t;
+})();
+function runSS(){
+  const raw=$('#ssText').value.trim(),out=$('#ssOut');
+  if(!raw){out.innerHTML='<div class="card"><p class="muted">Paste a follow-up message or choose a sample.</p></div>';return}
+  const r=secondScam(raw),ctx=$('#ssCtx').checked;
+  const head=r.matches.length?{critical:'Very likely a second scam',high:'Likely a second scam',low:''}[r.level]:'No follow-up scam pattern found';
+  out.innerHTML='<div class="card stack lv-'+r.level+'"><div class="risk-top"><div><span class="label">Result</span><h2>'+head+'</h2></div>'+pill(r.level)+'</div>'+
+   '<div class="quote">'+esc(raw)+'</div>'+
+   (r.matches.length?'<div><span class="label">Patterns matched</span><ul class="plain">'+r.matches.map(m=>'<li><b>'+m.k+'.</b> '+m.why+'</li>').join('')+(r.guar?'<li><b>Guaranteed outcome.</b> Nobody can promise to return lost money in a fixed time.</li>':'')+'</ul></div>':'<p class="muted">This message does not ask for money, an OTP or a PIN. Keep checking anything unexpected.</p>')+
+   (ctx&&r.matches.length?'<div class="dashed small"><span class="label">Your incident, used with your permission</span>You reported a loss of ₹9,800 by UPI. Contact that arrives after a loss, from a new number, offering to reverse it, is the classic follow-up pattern.</div>':'')+'</div>'+
+   (r.matches.length?'<div class="callout lv-critical"><b>Do not pay or share anything</b>No one can guarantee recovery. Real recovery runs through your bank and your complaint on cybercrime.gov.in, and never asks for a fee. Block the sender and keep the message as evidence.</div>':'');
+}
+
+/* ============ recovery ============ */
+const R={f:{money:true,otp:true,pin:true,apk:true,screen:true,docs:false,threat:false},done:{},rem:null};
+const INTAKE=[['money','I transferred money'],['otp','I shared an OTP'],['pin','I entered my UPI PIN'],['apk','I installed an app or APK'],['screen','I shared my screen or allowed remote access'],['docs','I shared ID documents'],['threat','I am being threatened or blackmailed']];
+const WHEN=[['Do now','critical'],['Today','high'],['This week','medium']];
+(function(){
+  $('#rIntake').innerHTML=INTAKE.map(i=>'<label><input type="checkbox" data-k="'+i[0]+'"'+(R.f[i[0]]?' checked':'')+' style="accent-color:var(--accent)">'+i[1]+'</label>').join('');
+  $('#rIntake').onchange=e=>{const k=e.target.dataset.k;if(k){R.f[k]=e.target.checked;recRender()}};
+  ['#rAmt','#rRef'].forEach(s=>$(s).addEventListener('input',recDraft));
+  $('#rCopy').onclick=e=>copyText($('#rDraft').textContent,e.currentTarget,$('#rDraft'));
+  const rems=['In 1 hour: call the bank back','Tonight: review account activity','Tomorrow 10:00: check complaint status'];
+  $('#rRem').innerHTML=rems.map((r,i)=>'<button class="chip-btn" aria-pressed="false" data-i="'+i+'">'+r+'</button>').join('');
+  $('#rRem').onclick=e=>{const b=e.target.closest('button');if(!b)return;b.setAttribute('aria-pressed',b.getAttribute('aria-pressed')!=='true');
+    const on=$$('#rRem button[aria-pressed="true"]').length;$('#rRemOut').textContent=on?on+' reminder'+(on>1?'s':'')+' chosen. This demo does not send anything.':''};
+})();
+function plan(){
+  const f=R.f,t=[];
+  const add=(id,p,title,detail,link)=>t.push({id,p,title,detail,link});
+  add('stop',0,'Stop all contact with the caller','Do not reply, call back or click anything they sent. Save screenshots first, then block the numbers.');
+  if(f.money||f.pin)add('bank',0,'Call your bank now, on the number on your card or in its app','Say it is a fraud transaction. Ask them to hold or block it and to freeze the account. Do not use a number from a message or a search ad.');
+  if(f.money)add('1930',0,'Call 1930, the cyber financial fraud helpline','The faster a report is registered, the better the chance that the receiving account can be flagged. Recovery is not guaranteed.');
+  if(f.apk||f.screen)add('remote',0,'End the remote session and remove the app','Switch on airplane mode. Uninstall the unknown or remote-access app and remove any special permissions it was given. Use a different, trusted device to change your passwords. If unsure, take the phone to a trusted technician.');
+  if(f.threat)add('threat',0,'Preserve the threats and do not engage','Screenshot every message. Do not pay. Tell someone you trust and report to your local police and on the portal.');
+  if(f.otp&&!f.money)add('otp',1,'Secure the account the OTP belonged to','Change its password from a trusted device and review recent activity. Ask the provider to block cards or sessions if anything looks unfamiliar.');
+  if(f.pin)add('pin',1,'Reset your UPI PIN and check linked accounts','Set a new PIN in your payment app and look through every linked bank account for debits you did not make.');
+  if(f.docs)add('docs',1,'Protect the identity documents you shared','Note which documents went out. Watch for new loans, SIM cards or accounts in your name, and check your credit report.');
+  add('evidence',1,'Collect your evidence','Messages, call log, screenshots, transaction ID, date and time, amount, and the receiving account or UPI ID. The timeline in this demo shows how it fits together.');
+  add('portal',1,'File a complaint on the National Cyber Crime Reporting Portal','Use the draft below as your starting point. Keep the acknowledgement number.','https://cybercrime.gov.in');
+  add('second',2,'Ignore anyone offering to recover your money for a fee','Contact that arrives after a loss is often a second scam. Check any such message in the second-scam module.');
+  add('follow',2,'Follow up with your bank and the portal','Ask for status updates using your reference numbers, and write down who you spoke to and when.');
+  return t.sort((a,b)=>a.p-b.p);
+}
+function recRender(){
+  const t=plan();
+  $('#rTasks').innerHTML=t.map(x=>'<label class="task'+(R.done[x.id]?' done':'')+' lv-'+WHEN[x.p][1]+'"><input type="checkbox" data-id="'+x.id+'"'+(R.done[x.id]?' checked':'')+'><span><span class="tt">'+x.title+'</span><span class="when">'+WHEN[x.p][0]+'</span><br><span class="small muted">'+x.detail+(x.link?' <a href="'+x.link+'" target="_blank" rel="noopener">cybercrime.gov.in</a>':'')+'</span></span></label>').join('');
+  $$('#rTasks input').forEach(i=>i.onchange=()=>{R.done[i.dataset.id]=i.checked;recRender()});
+  const d=t.filter(x=>R.done[x.id]).length;
+  $('#rCount').textContent=d+' of '+t.length+' done';$('#rBar').style.width=(t.length?d/t.length*100:0)+'%';
+  recDraft();
+}
+function recDraft(){
+  const f=R.f,amt=$('#rAmt').value,ref=$('#rRef').value;const L=[];
+  L.push('INCIDENT SUMMARY (draft for review)','');
+  L.push('Type of incident: '+(f.money?'Suspected financial fraud by impersonation of a bank officer':'Suspected impersonation and credential-theft attempt'));
+  L.push('First contact: SMS at 09:12 from 98XXX 41207 with a link to sbi-kyc-update.in','Follow-up: WhatsApp and phone call from the same number (09:20 to 09:26)');
+  const did=[];if(f.otp)did.push('shared an OTP');if(f.pin)did.push('entered a UPI PIN');if(f.apk)did.push('installed a remote-support app');if(f.screen)did.push('allowed remote access to the phone');if(f.docs)did.push('shared identity documents');
+  L.push('Actions taken under the caller’s instruction: '+(did.join(', ')||'none reported'));
+  if(f.money)L.push('Amount lost: ₹'+(amt?Number(amt).toLocaleString('en-IN'):'[amount]'),'Transaction reference: '+(ref||'[reference]'),'Receiving account: Rewards Desk (UPI), exact ID to be copied from the statement');
+  if(f.threat)L.push('Threats or blackmail were received. Screenshots are preserved.');
+  L.push('Later contact: a new number (70XXX 55318) offered recovery for a ₹4,500 fee. I did not pay.','','ACTIONS COMPLETED: '+(Object.keys(R.done).filter(k=>R.done[k]).length||'none yet'),'Bank informed: [yes/no, time]','1930 call reference: [add]','','Details above are from my own records. Bracketed items need your input before filing.');
+  $('#rDraft').textContent=L.join('\n');
+}
+
+/* ============ family ============ */
+const F={contacts:['Amma (mother)','Rohan (brother)'],sel:1,share:{type:true,amount:true,numbers:false,evidence:false,plan:false},asked:false};
+const FSH=[['type','What kind of scam it looks like'],['amount','Amount lost'],['numbers','Phone numbers involved'],['evidence','Screenshots and evidence'],['plan','My recovery checklist']];
+function famRender(){
+  $('#fContacts').innerHTML=F.contacts.map((c,i)=>'<button class="chip-btn" aria-pressed="'+(i===F.sel)+'" data-i="'+i+'">'+esc(c)+'</button>').join('');
+  $('#fWho').textContent=F.contacts[F.sel]?F.contacts[F.sel].split(' (')[0]:'';
+  $('#fToggles').innerHTML=FSH.map(s=>'<label class="toggle"><span>'+s[1]+'</span><input type="checkbox" data-k="'+s[0]+'"'+(F.share[s[0]]?' checked':'')+'></label>').join('');
+  const nm=F.contacts[F.sel]?F.contacts[F.sel].split(' (')[0]:'your contact';
+  const lines=[];if(F.share.type)lines.push('Looks like: bank-impersonation scam');if(F.share.amount)lines.push('Amount: ₹9,800');if(F.share.numbers)lines.push('Numbers: 98XXX 41207, 70XXX 55318');if(F.share.evidence)lines.push('5 screenshots attached');if(F.share.plan)lines.push('Checklist: 4 of 9 done');
+  if(F.asked){
+    $('#fPhone').innerHTML='<div class="bubble"><b>Priya needs your help.</b><br>She may have been scammed and wants you to call her.'+(lines.length?'<br><br>'+lines.map(esc).join('<br>'):'')+'</div>';
+    $('#fNote').textContent='Priya chose to share only these details with '+nm+'. Nothing else is visible to them.';
+  }else{
+    $('#fPhone').innerHTML='<p class="muted small">Press "Ask for help" to preview the message '+esc(nm)+' would get.</p>';$('#fNote').textContent='';
+  }
+  const sen=F.senior;
+  $('#fSenior').className='card stack'+(sen?' senior':'');
+  $('#fSenior').innerHTML='<div class="risk-top"><h2>Simple view for senior citizens</h2><button class="btn ghost" id="fSenBtn">'+(sen?'Back to normal size':'Show the simple view')+'</button></div>'+
+   (sen?'<p>Pick what is happening right now.</p><button class="btn big" data-s="ask">Someone is asking for my OTP, PIN or money</button><button class="btn big ghost" data-s="did">I already shared something or sent money</button><div id="fSenOut" class="callout" style="--lv:var(--crit);--lv-soft:var(--crit-soft)" hidden></div>':'<p class="muted">Large text, two choices, one clear instruction. Switch it on to try it.</p>');
+  $('#fSenBtn').onclick=()=>{F.senior=!F.senior;F.senChoice=null;famRender()};
+  $$('#fSenior [data-s]').forEach(b=>b.onclick=()=>{const o=$('#fSenOut');o.hidden=false;o.innerHTML=b.dataset.s==='ask'?'<b>Stop. Hang up.</b>Do not tell them anything. Call '+esc(nm)+' now and tell them what happened.':'<b>Call 1930 now.</b>Then call your bank on the number on your card, and then call '+esc(nm)+'.'});
+}
+$('#fContacts').onclick=e=>{const b=e.target.closest('button');if(!b)return;F.sel=+b.dataset.i;F.asked=false;famRender()};
+$('#fToggles').onchange=e=>{const k=e.target.dataset.k;if(k){F.share[k]=e.target.checked;famRender()}};
+$('#fAsk').onclick=()=>{F.asked=true;famRender()};
+$('#fRevoke').onclick=()=>{Object.keys(F.share).forEach(k=>F.share[k]=false);F.asked=true;famRender()};
+$('#fAdd').onclick=()=>{const v=$('#fNew').value.trim();if(!v)return;F.contacts.push(v);F.sel=F.contacts.length-1;$('#fNew').value='';F.asked=false;famRender()};
+
+/* ============ simulator ============ */
+const SIM=[
+ {t:'UPI refund',story:'A caller says a ₹2,000 refund for a cancelled order is pending. He sends a QR code and asks you to scan it and enter your UPI PIN "to receive" the money.',
+  o:[['Scan the QR code and enter my UPI PIN','unsafe','The scan opens a payment, and your PIN approves it. ₹2,000 is not credited. Money is taken from your account instead. Receiving money never needs a PIN.'],
+     ['Scan the QR code but stop before the PIN','risky','Risky. There is no reason to scan at all. The caller now knows your number is active, and a rushed second step is where most people lose money.'],
+     ['Hang up and check the refund in the shopping app I used','safe','Safe. Real refunds show up in the app you ordered from and go back to your account without any action from you.']]},
+ {t:'Digital arrest',story:'A video call from a man in uniform says a parcel with illegal items is in your name. You are "under digital arrest", must stay on camera and must move ₹50,000 to a "safe account" to clear your name.',
+  o:[['Stay on camera and transfer the money','unsafe','There is no such thing as digital arrest. Staying on camera cuts you off from anyone who could warn you, and the money goes to the scammers.'],
+     ['Ask for his badge number and stay on the call','risky','Risky. A badge number can be invented on the spot, and you are still isolated on the call.'],
+     ['End the call, tell a family member and report on 1930','safe','Safe. No agency arrests or questions people by video call or takes money to close a case. Ending the call breaks the pressure.']]},
+ {t:'Fake job offer',story:'A WhatsApp job pays ₹3,000 a day for liking videos. After two small payouts, the "manager" asks for an ₹8,000 task deposit to unlock a bigger batch that pays much more.',
+  o:[['Pay the ₹8,000 to unlock the bigger batch','unsafe','The early payouts were bait. The deposit is the scam, and the batches keep growing so you keep paying.'],
+     ['Pay ₹1,000 first as a test','risky','Risky. Any deposit proves you will pay, and the next request will be larger.'],
+     ['Stop, keep the chat as evidence and report the number','safe','Safe. A real employer never charges to start work. Keep the chat and report it on the portal.']]}];
+const SIMS={pre:null,i:0,pick:[],post:null};
+const COL={unsafe:'crit',risky:'high',safe:'ok'};
+function simRender(){
+  const b=$('#simBox');
+  if(SIMS.pre===null){
+    b.innerHTML='<h2>Before you start</h2><p>If a stranger called you tomorrow with a convincing story about your bank account, how sure are you that you would spot the scam?</p><div class="row" id="scale">'+[1,2,3,4,5].map(n=>'<button class="chip-btn" data-n="'+n+'">'+n+'</button>').join('')+'</div><p class="small muted">1 means not sure at all. 5 means very sure.</p>';
+    $('#scale').onclick=e=>{const x=e.target.closest('button');if(!x)return;SIMS.pre=+x.dataset.n;simRender()};return}
+  if(SIMS.i<SIM.length){
+    const s=SIM[SIMS.i],ans=SIMS.pick[SIMS.i];
+    b.innerHTML='<div class="risk-top"><span class="label" style="margin:0">Scenario '+(SIMS.i+1)+' of 3 · '+s.t+'</span><div class="dots">'+SIM.map((_,i)=>'<i class="'+(i<=SIMS.i?'on':'')+'"></i>').join('')+'</div></div><p style="font-size:17px">'+s.story+'</p><p class="label" style="margin:4px 0 0">What do you do?</p>'+
+      s.o.map((o,j)=>'<button class="opt'+(ans===j?' picked lv-'+COL[o[1]]:'')+'" data-j="'+j+'"'+(ans!==undefined?' disabled':'')+(ans===j?' style="border-color:var(--'+COL[o[1]]+')"':'')+'>'+o[0]+'</button>').join('')+
+      (ans!==undefined?'<div class="callout" style="--lv:var(--'+COL[s.o[ans][1]]+');--lv-soft:var(--'+COL[s.o[ans][1]]+'-soft)" aria-live="polite"><b>'+({unsafe:'Unsafe choice',risky:'Risky choice',safe:'Safe choice'})[s.o[ans][1]]+'</b>'+s.o[ans][2]+'</div>'+
+        (s.o[ans][1]!=='safe'?'<p class="small muted">Safest option: '+esc(s.o.find(o=>o[1]==='safe')[0])+'.</p>':'')+'<div><button class="btn" id="simNext">'+(SIMS.i===SIM.length-1?'See my result':'Next scenario')+'</button></div>':'');
+    $$('#simBox .opt').forEach(x=>x.onclick=()=>{SIMS.pick[SIMS.i]=+x.dataset.j;simRender()});
+    const nx=$('#simNext');if(nx)nx.onclick=()=>{SIMS.i++;simRender()};return}
+  const safe=SIMS.pick.filter((p,i)=>SIM[i].o[p][1]==='safe').length;
+  if(SIMS.post===null){
+    b.innerHTML='<h2>After the scenarios</h2><p>You chose the safe option '+safe+' of 3 times. Now, how sure are you that you would spot a scam call?</p><div class="row" id="scale">'+[1,2,3,4,5].map(n=>'<button class="chip-btn" data-n="'+n+'">'+n+'</button>').join('')+'</div>';
+    $('#scale').onclick=e=>{const x=e.target.closest('button');if(!x)return;SIMS.post=+x.dataset.n;simRender()};return}
+  const d=SIMS.post-SIMS.pre;
+  b.innerHTML='<h2>Your result</h2><div class="compare"><div><span class="label">Safe choices</span><b>'+safe+' of 3</b></div><div><span class="label">Confidence</span><b>'+SIMS.pre+' → '+SIMS.post+'</b></div></div>'+
+   '<p>'+(safe===3?'You picked the safe option every time. The common thread is to stop, leave the call and check through a channel you found yourself.':'The safest move in every scenario was to stop, leave the conversation and check through a channel you found yourself.')+(d<0?' Your confidence went down, which can be a healthy result: knowing how convincing these scams are makes you more careful.':'')+'</p>'+
+   '<div><button class="btn" id="simAgain">Try again</button></div>';
+  $('#simAgain').onclick=()=>{SIMS.pre=null;SIMS.i=0;SIMS.pick=[];SIMS.post=null;simRender()};
+}
+
+/* ============ boot ============ */
+$('#startDemo').onclick=()=>{S.demo=true;$('#anaText').value=SAMPLES[0].t;runAnalyze();location.hash='analyze';route()};
+runAnalyze();renderJourney();renderVerify();tlRender();recRender();runSS();famRender();simRender();
+route();
+})();
+</script>
+
+</body></html>
